@@ -88,3 +88,20 @@ body { background:var(--paper); }
 .teacher-profile { display:flex; align-items:center; gap:12px; max-width:285px; margin:24px 0 0; padding:12px 14px; border:1px solid #edcf74; background:#fff7dd; border-radius:12px; color:#17130e; }.teacher-profile span { display:block; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.7px; text-transform:uppercase; color:#956000; }.teacher-profile strong { display:block; font-size:14px; margin-top:3px; }.teacher-profile small { display:block; font-size:12px; margin-top:2px; color:#746757; }.teacher-photo-placeholder { display:grid; place-items:center; width:42px; height:42px; flex:0 0 42px; border-radius:50%; background:#17130e; color:#ffbd19; font-family:Fraunces,serif; font-weight:700; letter-spacing:-1px; }.login-visual .teacher-profile { background:rgba(255,255,255,.08); border-color:rgba(255,189,25,.45); color:white; align-self:flex-start; }.login-visual .teacher-profile span,.login-visual .teacher-profile small { color:#e6d8be; }.login-visual .teacher-photo-placeholder { background:#ffbd19; color:#17130e; }.parent-header + .teacher-profile { margin:0 0 24px; }.community-intro .teacher-profile { margin:0; background:#fff7dd; }.community-intro .teacher-profile.compact { min-width:230px; }
 .homework-card { background:#fff3c8; border-color:#f1d77b; }.homework-icon { background:#17130e; color:#ffbd19; }.teacher-post .post-avatar { background:#17130e; color:#ffbd19; }.post-meta span { color:#754400; background:#fff0c8; }.language-switch { background:#201a13; border-color:#4d4030; }.language-switch button.active { background:#ffbd19; color:#17130e; }.language-switch button { color:#dacbb5; }
 @media(max-width:800px) { .teacher-profile { max-width:none; }.community-intro .teacher-profile.compact { min-width:0; width:100%; }.login-visual .teacher-profile { margin-top:10px; } }
+
+/* A phone-friendly attendance record: no horizontal scrolling is needed. */
+@media(max-width:800px) {
+  .parent-main .table-wrap { overflow:visible; padding:12px; }
+  .parent-main .parent-table { display:block; width:100%; min-width:0; }
+  .parent-main .parent-table thead { display:none; }
+  .parent-main .parent-table tbody,
+  .parent-main .parent-table tr { display:block; width:100%; }
+  .parent-main .parent-table tr { padding:12px 14px; margin-bottom:10px; border:1px solid #eadcc7; border-radius:11px; background:#fffdf8; }
+  .parent-main .parent-table tr:last-child { margin-bottom:0; }
+  .parent-main .parent-table td,
+  .parent-main .parent-table td:not(:first-child) { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; min-width:0; padding:8px 0; border:0; text-align:right; }
+  .parent-main .parent-table td:first-child { position:static; z-index:auto; justify-content:flex-start; padding:1px 0 10px; margin-bottom:4px; border-bottom:1px solid #eadcc7; background:transparent; text-align:left; }
+  .parent-main .parent-table td:not(:first-child)::before { content:attr(data-date); color:#766d60; font-family:'DM Mono',monospace; font-size:10px; font-weight:600; letter-spacing:.2px; text-align:left; }
+  .parent-main .parent-table .mark { width:27px; height:27px; }
+  .parent-main .class-overview .parent-table tr { background:#fffaf2; }
+}
