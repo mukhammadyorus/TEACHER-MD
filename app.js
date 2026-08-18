@@ -115,4 +115,14 @@ function putLoggedInStudentFirst(){
   const ownMember=[...document.querySelectorAll('.member-card')].find(card=>card.querySelector('strong')?.textContent.trim()===parentStudent);
   if(ownMember) ownMember.parentElement.prepend(ownMember);
 }
-render=function(){renderClassCheckPage();labelParentAttendanceCells();putLoggedInStudentFirst()};
+function addStudentDirectoryShortcut(){
+  if(screen!=='parent') return;
+  const topbar=$('.topbar');
+  if(!topbar||topbar.querySelector('.student-directory-shortcut')) return;
+  const button=document.createElement('button');
+  button.className='btn soft group-space-button student-directory-shortcut';
+  button.textContent='O‘quvchilar';
+  button.onclick=()=>openMembers(parentClass,'parent');
+  topbar.querySelector('.btn.outline')?.before(button);
+}
+render=function(){renderClassCheckPage();labelParentAttendanceCells();putLoggedInStudentFirst();addStudentDirectoryShortcut()};
