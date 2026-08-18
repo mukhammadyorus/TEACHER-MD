@@ -108,4 +108,11 @@ function labelParentAttendanceCells(){
   });
 }
 const renderClassCheckPage=render;
-render=function(){renderClassCheckPage();labelParentAttendanceCells()};
+function putLoggedInStudentFirst(){
+  if(!parentStudent) return;
+  const ownAttendanceRow=document.querySelector('.class-overview .parent-table tr.current-student');
+  if(ownAttendanceRow) ownAttendanceRow.parentElement.prepend(ownAttendanceRow);
+  const ownMember=[...document.querySelectorAll('.member-card')].find(card=>card.querySelector('strong')?.textContent.trim()===parentStudent);
+  if(ownMember) ownMember.parentElement.prepend(ownMember);
+}
+render=function(){renderClassCheckPage();labelParentAttendanceCells();putLoggedInStudentFirst()};
