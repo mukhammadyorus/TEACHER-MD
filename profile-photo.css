@@ -1,0 +1,12 @@
+.teacher-photo {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  object-fit: cover;
+  object-position: center 24%;
+  border-radius: 50%;
+  border: 2px solid #ffbd19;
+  background: #17130e;
+}
+
+.login-visual .teacher-photo { border-color: #ffbd19; }

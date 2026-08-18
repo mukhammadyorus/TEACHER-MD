@@ -1,0 +1,90 @@
+.class-overview { margin-top: 24px; }
+.current-student td { background: #f5f9f0; }
+.parent-table .current-student td:first-child { background: #f5f9f0; }
+.you-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--leaf);
+  background: #e4f0c5;
+  padding: 2px 5px;
+  border-radius: 4px;
+  margin-left: 5px;
+  vertical-align: middle;
+}
+
+.btn.danger {
+  background: transparent;
+  border: 1px solid #efc6c1;
+  color: var(--red);
+  margin-right: 8px;
+}
+
+.remove-student {
+  background: transparent;
+  color: var(--red);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 0;
+}
+
+.language-switch {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  margin-left: 14px;
+}
+
+.language-switch button {
+  border-radius: 5px;
+  background: transparent;
+  color: var(--muted);
+  padding: 5px 7px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.language-switch button.active {
+  background: var(--forest);
+  color: #fff;
+}
+
+.group-space-button { margin-right: 8px; }
+.community-main { max-width: 960px; margin: 0 auto; padding: 46px 30px 70px; }
+.community-intro { display: flex; justify-content: space-between; gap: 20px; align-items: flex-end; margin-bottom: 28px; }
+.community-intro h1 { font-family: Fraunces, serif; font-size: 42px; letter-spacing: -1.6px; margin: 7px 0; }
+.community-intro p { color: var(--muted); margin: 0; }
+.homework-card { display: flex; align-items: flex-start; gap: 16px; padding: 22px; background: #eff6d5; border: 1px solid #dcecb4; border-radius: 14px; margin-bottom: 25px; }
+.homework-icon { width: 36px; height: 36px; flex: 0 0 36px; border-radius: 10px; display: grid; place-items: center; color: var(--forest); background: var(--lime); font-size: 19px; }
+.homework-card h2,.discussion h2 { font-family: Fraunces, serif; letter-spacing: -.6px; font-size: 22px; margin: 4px 0 6px; }
+.homework-card p { margin: 0; color: #526154; font-size: 14px; line-height: 1.5; }
+.homework-edit { margin-left: auto; background: transparent; color: var(--forest); font-weight: 600; font-size: 13px; }
+.discussion { background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
+.discussion-heading { display: flex; justify-content: space-between; padding: 21px 22px; border-bottom: 1px solid var(--line); }
+.discussion-heading h2 { margin: 0; }.discussion-heading p { margin: 5px 0 0; color: var(--muted); font-size: 13px; }.discussion-heading span { font-family: 'DM Mono', monospace; color: var(--muted); font-size: 11px; }
+.post-list { padding: 4px 22px; }.post { display: flex; gap: 12px; padding: 19px 0; border-bottom: 1px solid #edf0ea; }.post:last-child { border-bottom: 0; }
+.post-avatar { width: 32px; height: 32px; border-radius: 50%; flex: 0 0 32px; display: grid; place-items: center; background: #e5ede5; color: var(--forest); font-size: 11px; font-weight: 700; }.teacher-post .post-avatar { background: var(--forest); color: var(--lime); }.post-content { min-width: 0; }.post-meta { display: flex; align-items: center; gap: 8px; font-size: 13px; }.post-meta span { font-family: 'DM Mono', monospace; color: var(--leaf); background: #eef5e8; border-radius: 4px; padding: 2px 4px; font-size: 9px; }.post-meta time { color: #9ba39e; font-size: 11px; margin-left: 2px; }.post-content p { margin: 6px 0 0; color: #38463e; font-size: 14px; line-height: 1.5; }
+.composer { display: flex; gap: 12px; padding: 18px 22px; background: #fcfcfa; border-top: 1px solid var(--line); }.composer-input { flex: 1; }.composer textarea { width: 100%; min-height: 70px; border: 1px solid var(--line); background: #fff; border-radius: 9px; padding: 10px; resize: vertical; color: var(--ink); }.composer-input > div { display: flex; justify-content: space-between; align-items: center; margin-top: 9px; }.composer-input span { color: var(--muted); font-size: 12px; }.composer-input .btn { padding: 8px 13px; }
+@media(max-width:800px) { .community-main { padding: 30px 18px; }.community-intro { align-items: flex-start; flex-direction: column; }.community-intro h1 { font-size: 34px; }.group-space-button { display: none; } }
+
+/* Teacher Muhammaddiyor brand system */
+:root { --ink:#17130e; --muted:#766d60; --forest:#17130e; --leaf:#8d5400; --lime:#ffbd19; --paper:#fffaf2; --warm:#fff0cf; --line:#ebdfca; --red:#be3d28; --red-bg:#fff0eb; --green:#7b4b00; --green-bg:#fff1c9; --shadow:0 16px 40px rgba(51,33,4,.11); }
+body { background:var(--paper); }
+.topbar { background:#17130e; color:#fffaf2; border-bottom-color:#2f271d; }
+.brand { color:#fffaf2; gap:9px; font-size:16px; letter-spacing:-.3px; }
+.brand img { width:34px; height:34px; object-fit:cover; border-radius:8px; }
+.brand-mark { display:none; }
+.topbar .role { color:#cdbfa9; }.topbar .avatar { background:#ffbd19; color:#17130e; }
+.top-logo { width:34px; height:34px; object-fit:cover; border-radius:50%; border:2px solid #ffbd19; }
+.btn.primary { background:#ffbd19; color:#17130e; }.btn.primary:hover { background:#f0a900; }
+.btn.soft { background:#fff0cf; color:#482b00; }.btn.outline { border-color:#d8c7ac; color:inherit; background:transparent; }
+.topbar .btn.outline { color:#fff; border-color:#5a4a38; }.topbar .btn.soft { background:#ffbd19; color:#17130e; }
+.eyebrow { color:#a25e00; }.nav-item.active { background:#fff0cf; color:#552f00; }.nav-item { color:#74685a; }.class-card { border-color:#eadcc7; }
+.stat { border-color:#eadcc7; }.attendance-box,.discussion { border-color:#eadcc7; }.status-btn.present.selected,.mark.present { background:#fff1c9; color:#8b5200; }.summary-card { background:#fff0cf; }.class-overview .current-student td { background:#fff8e7; }.parent-table .current-student td:first-child { background:#fff8e7; }
+.login-visual { background:#17130e; color:#fff; position:relative; }.login-visual:before { content:''; position:absolute; inset:0; background:linear-gradient(145deg,rgba(255,189,25,.16),transparent 48%); pointer-events:none; }.login-visual>* { position:relative; }.login-visual .brand { color:#fff; }.login-visual h1 em { color:#ffbd19; }.login-visual p,.quote { color:#e2d7c5; }.login-panel { background:#fffaf2; }.login-form h2 { color:#17130e; }.login-form .btn.primary { background:#17130e; color:#ffbd19; }.login-form .btn.primary:hover { background:#2c2114; }
+.teacher-profile { display:flex; align-items:center; gap:12px; max-width:285px; margin:24px 0 0; padding:12px 14px; border:1px solid #edcf74; background:#fff7dd; border-radius:12px; color:#17130e; }.teacher-profile span { display:block; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.7px; text-transform:uppercase; color:#956000; }.teacher-profile strong { display:block; font-size:14px; margin-top:3px; }.teacher-profile small { display:block; font-size:12px; margin-top:2px; color:#746757; }.teacher-photo-placeholder { display:grid; place-items:center; width:42px; height:42px; flex:0 0 42px; border-radius:50%; background:#17130e; color:#ffbd19; font-family:Fraunces,serif; font-weight:700; letter-spacing:-1px; }.login-visual .teacher-profile { background:rgba(255,255,255,.08); border-color:rgba(255,189,25,.45); color:white; align-self:flex-start; }.login-visual .teacher-profile span,.login-visual .teacher-profile small { color:#e6d8be; }.login-visual .teacher-photo-placeholder { background:#ffbd19; color:#17130e; }.parent-header + .teacher-profile { margin:0 0 24px; }.community-intro .teacher-profile { margin:0; background:#fff7dd; }.community-intro .teacher-profile.compact { min-width:230px; }
+.homework-card { background:#fff3c8; border-color:#f1d77b; }.homework-icon { background:#17130e; color:#ffbd19; }.teacher-post .post-avatar { background:#17130e; color:#ffbd19; }.post-meta span { color:#754400; background:#fff0c8; }.language-switch { background:#201a13; border-color:#4d4030; }.language-switch button.active { background:#ffbd19; color:#17130e; }.language-switch button { color:#dacbb5; }
+@media(max-width:800px) { .teacher-profile { max-width:none; }.community-intro .teacher-profile.compact { min-width:0; width:100%; }.login-visual .teacher-profile { margin-top:10px; } }
