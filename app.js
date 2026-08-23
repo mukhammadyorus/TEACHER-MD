@@ -15,6 +15,7 @@ let parentSession = null, parentStudentId = null;
 let profileStudent = '', profileClass = '', profileReturn = 'parent', profileEditable = false, teacherProfileReturn = 'parent';
 let teacherSession = null, onlineStudents = [];
 let essentialReturn = 'teacher', essentialBook = null, essentialUnit = null;
+let essentialView = 'list', essentialCardIndex = 0, essentialFlipped = false;
 const $ = s => document.querySelector(s);
 function save(){localStorage.setItem('classcheck-data',JSON.stringify(db))}
 function today(){return new Date().toISOString().slice(0,10)}
@@ -85,10 +86,22 @@ function essentialUnitsScreen(){
   const units=Array.from({length:30},(_,i)=>i+1);
   return `<div class="shell"><header class="topbar"><div class="brand"><i class="brand-mark"></i>ClassCheck</div><button class="btn outline" onclick="screen='essential-books';render()">← Back</button></header><main class="results-page"><div class="results-intro"><div><div class="eyebrow">Essential ${essentialBook}</div><h1>Choose a unit</h1><p>Each unit has 20 English–Uzbek word pairs.</p></div></div><section class="essential-unit-grid">${units.map(u=>`<button class="essential-unit-card" onclick="openEssentialUnitWords(${u})">Unit ${u}</button>`).join('')}</section></main></div>`;
 }
-function openEssentialUnitWords(u){essentialUnit=u;screen='essential-words';render()}
+function openEssentialUnitWords(u){essentialUnit=u;essentialView='list';essentialCardIndex=0;essentialFlipped=false;screen='essential-words';render()}
+function setEssentialView(v){essentialView=v;essentialCardIndex=0;essentialFlipped=false;render()}
+function flipEssentialCard(){essentialFlipped=!essentialFlipped;render()}
+function nextEssentialCard(){const words=(window.ESSENTIAL_DATA[essentialBook]&&window.ESSENTIAL_DATA[essentialBook][essentialUnit])||[];essentialCardIndex=Math.min(essentialCardIndex+1,words.length-1);essentialFlipped=false;render()}
+function prevEssentialCard(){essentialCardIndex=Math.max(essentialCardIndex-1,0);essentialFlipped=false;render()}
 function essentialWordsScreen(){
   const words=(window.ESSENTIAL_DATA[essentialBook]&&window.ESSENTIAL_DATA[essentialBook][essentialUnit])||[];
-  return `<div class="shell"><header class="topbar"><div class="brand"><i class="brand-mark"></i>ClassCheck</div><button class="btn outline" onclick="screen='essential-units';render()">← Back</button></header><main class="results-page"><div class="results-intro"><div><div class="eyebrow">Essential ${essentialBook} · Unit ${essentialUnit}</div><h1>Word list</h1><p>English – Uzbek</p></div></div><section class="essential-word-list">${words.map(([en,uz])=>`<div class="essential-word-row"><span class="essential-word-en">${en}</span><span class="essential-word-uz">${uz||'Tarjima tez orada qo\u2019shiladi'}</span></div>`).join('')}</section></main></div>`;
+  const toggle=`<div class="essential-view-toggle"><button class="${essentialView==='list'?'active':''}" onclick="setEssentialView('list')">List</button><button class="${essentialView==='cards'?'active':''}" onclick="setEssentialView('cards')">Flashcards</button></div>`;
+  let body;
+  if(essentialView==='cards' && words.length){
+    const [en,uz]=words[essentialCardIndex];
+    body=`<section class="essential-flashcard-wrap"><div class="essential-flashcard ${essentialFlipped?'flipped':''}" onclick="flipEssentialCard()"><div class="essential-flashcard-face essential-flashcard-front">${en}</div><div class="essential-flashcard-face essential-flashcard-back">${uz||'Tarjima tez orada qo\u2019shiladi'}</div></div><p class="essential-flashcard-hint">Tap the card to flip</p><div class="essential-flashcard-nav"><button class="btn soft" onclick="prevEssentialCard()" ${essentialCardIndex===0?'disabled':''}>← Prev</button><span class="essential-flashcard-count">${essentialCardIndex+1} / ${words.length}</span><button class="btn soft" onclick="nextEssentialCard()" ${essentialCardIndex===words.length-1?'disabled':''}>Next →</button></div></section>`;
+  }else{
+    body=`<section class="essential-word-list">${words.map(([en,uz])=>`<div class="essential-word-row"><span class="essential-word-en">${en}</span><span class="essential-word-uz">${uz||'Tarjima tez orada qo\u2019shiladi'}</span></div>`).join('')}</section>`;
+  }
+  return `<div class="shell"><header class="topbar"><div class="brand"><i class="brand-mark"></i>ClassCheck</div><button class="btn outline" onclick="screen='essential-units';render()">← Back</button></header><main class="results-page"><div class="results-intro"><div><div class="eyebrow">Essential ${essentialBook} · Unit ${essentialUnit}</div><h1>Word list</h1><p>English – Uzbek</p></div>${toggle}</div>${body}</main></div>`;
 }
 function members(){const cls=classById(communityClass);return `<div class="shell"><header class="topbar"><div class="brand"><i class="brand-mark"></i>ClassCheck</div><button class="btn outline" onclick="screen='community';render()">← Back</button></header><main class="results-page"><div class="results-intro"><div><div class="eyebrow">${cls.name}</div><h1>Group members</h1><p>Visit classmates’ profiles and get to know your group.</p></div></div><section class="member-grid">${cls.students.map(student=>{const profile=getStudentProfile(communityClass,student);return `<button class="member-card" onclick="openStudentProfile('${student}','${communityClass}','members',${student===parentStudent&&communityReturn==='parent'})">${profile.photo?`<img src="${profile.photo}" alt="${student}">`:`<span>${student.split(' ').map(x=>x[0]).join('').slice(0,2)}</span>`}<strong>${student}</strong><small>${profile.about||'View profile'}</small></button>`}).join('')}</section></main></div>`}
 function openCommunity(classId,from){communityClass=classId;communityReturn=from;screen='community';render()}
