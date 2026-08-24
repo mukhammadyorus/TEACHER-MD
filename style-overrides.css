@@ -116,3 +116,4 @@ body { background:var(--paper); }
   .community-header-actions .group-space-button { display:block !important; flex:1 1 42%; min-width:110px; margin:0; }
   .community-header-actions .btn.outline { width:100%; }
 }
+.status-btn.homework{color:#8b5200}.status-btn.homework:hover{background:#fff1c9;color:#8b5200}
