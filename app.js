@@ -11,7 +11,7 @@ db.results ||= {};
 let screen = new URLSearchParams(location.search).has('teacher') ? 'teacher-login' : 'login', selectedClass = 'b1', selectedDate = today(), parentStudent = 'Amir Karimov', parentClass = 'b1', parentMonth = '2026-08', language = localStorage.getItem('classcheck-language') || 'UZB';
 let communityClass = 'b1', communityReturn = 'teacher';
 let authAccess = null, loginStep = 'phone', accessStudent = '';
-const TELEGRAM_ICON_SVG = '<svg viewBox="27 69 310 310" width="30" height="30"><path fill="#fff" d="M362 176.7c-3.7 39.2-19.9 134.4-28.1 178.3-3.5 18.6-10.4 24.9-17 25.5-14.4 1.3-25.4-9.5-39.3-18.7-21.8-14.3-34.2-23.2-55.3-37.2-24.5-16.1-8.6-25 5.3-39.5 3.7-3.8 67.1-61.5 68.3-66.7 .2-.7 .3-3.1-1.2-4.4s-3.6-.8-5.1-.5q-3.3 .7-104.6 69.1-14.8 10.2-26.9 9.9c-8.9-.2-25.9-5-38.6-9.1-15.5-5.1-27.9-7.8-26.8-16.4q.8-6.7 18.5-13.7 108.4-47.2 144.6-62.3c68.9-28.6 83.2-33.6 92.5-33.8 2.1 0 6.6 .5 9.6 2.9a10.5 10.5 0 0 1 3.5 6.7A43.8 43.8 0 0 1 362 176.7z"/></svg>';
+const TELEGRAM_ICON_SVG = '<svg viewBox="-28 14 310 310" width="30" height="30"><path fill="#fff" d="M362 176.7c-3.7 39.2-19.9 134.4-28.1 178.3-3.5 18.6-10.4 24.9-17 25.5-14.4 1.3-25.4-9.5-39.3-18.7-21.8-14.3-34.2-23.2-55.3-37.2-24.5-16.1-8.6-25 5.3-39.5 3.7-3.8 67.1-61.5 68.3-66.7 .2-.7 .3-3.1-1.2-4.4s-3.6-.8-5.1-.5q-3.3 .7-104.6 69.1-14.8 10.2-26.9 9.9c-8.9-.2-25.9-5-38.6-9.1-15.5-5.1-27.9-7.8-26.8-16.4q.8-6.7 18.5-13.7 108.4-47.2 144.6-62.3c68.9-28.6 83.2-33.6 92.5-33.8 2.1 0 6.6 .5 9.6 2.9a10.5 10.5 0 0 1 3.5 6.7A43.8 43.8 0 0 1 362 176.7z"/></svg>';
 let parentSession = null, parentStudentId = null;
 const TELEGRAM_BOT_USERNAME = 'teacher_md_bot';
 let telegramLinked = false;
