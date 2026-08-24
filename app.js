@@ -68,10 +68,46 @@ async function deleteMediaPost(postId,storagePath){if(!confirm('Remove this phot
 async function saveStudentProfile(){const about=$('#student-about').value.trim();const file=$('#student-photo-input').files?.[0];const studentId=parentStudentId;if(file&&file.size>25*1024*1024){alert('Please choose a photo under 25 MB.');return}closeModal();const p=getStudentProfile(profileClass,profileStudent);let avatarPath=p.avatarPath||null;if(file){const blob=await compressImage(file);avatarPath=`${studentId}/avatar-${Date.now()}.jpg`;await uploadMedia(blob,avatarPath)}await window.classcheckSupabase.from('student_profiles').upsert({student_id:studentId,about,avatar_path:avatarPath,updated_at:new Date().toISOString()});await loadProfilesFor(profileClass);render()}
 function openMediaModal(){modal(`<h2>Share media</h2><p>Choose a photo or short video for your group profile. Photos are optimised automatically, so there's no need to resize anything yourself.</p><div class="field"><label>Photo or video</label><input id="media-input" type="file" accept="image/*,video/*" /></div><div class="modal-actions"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveMedia()">Add to profile</button></div>`)}
 async function saveMedia(){const input=$('#media-input'),file=input.files?.[0];if(!file)return;const isVideo=file.type.startsWith('video');const maxSize=isVideo?50*1024*1024:25*1024*1024;if(file.size>maxSize){alert(`Please choose a ${isVideo?'video':'photo'} under ${isVideo?'50':'25'} MB.`);return}closeModal();const studentId=parentStudentId;const blob=isVideo?file:await compressImage(file);const ext=isVideo?(file.name.split('.').pop()||'mp4'):'jpg';const path=`${studentId}/post-${Date.now()}.${ext}`;await uploadMedia(blob,path);await window.classcheckSupabase.from('profile_posts').insert({student_id:studentId,group_id:profileClass,media_type:isVideo?'video':'image',storage_path:path});await loadProfilesFor(profileClass);render()}
-function openResults(classId,from){communityClass=classId;communityReturn=from;screen='results';render()}
-function results(){const cls=classById(communityClass),items=db.results[communityClass]||[],teacher=communityReturn==='teacher';return `<div class="shell"><header class="topbar"><div class="brand"><i class="brand-mark"></i>ClassCheck</div><button class="btn outline" onclick="screen='${communityReturn}';render()">← Back</button></header><main class="results-page"><div class="results-intro"><div><div class="eyebrow">${cls.name}</div><h1>Results & feedback</h1><p>Celebrate progress and see teacher feedback for the group.</p></div>${teacher?'<button class="btn primary" onclick="openResultModal()">+ Post a result</button>':''}</div><section class="results-list">${items.length?items.map(item=>`<article class="result-card"><div class="result-initial">${item.student.split(' ').map(x=>x[0]).join('').slice(0,2)}</div><div><span>${item.student}${item.score?` · ${item.score}`:''}</span><h2>${item.title}</h2><p>${item.review}</p></div></article>`).join(''):'<div class="empty">No results have been posted yet.</div>'}</section></main></div>`}
-function openResultModal(){const cls=classById(communityClass);modal(`<h2>Post a result</h2><div class="field"><label>Student</label><select id="result-student">${cls.students.map(s=>`<option>${s}</option>`).join('')}</select></div><div class="field"><label>Result / score</label><input id="result-score" placeholder="e.g. 86% or IELTS mock 6.5" /></div><div class="field"><label>Title</label><input id="result-title" placeholder="e.g. Excellent speaking progress" /></div><div class="field"><label>Teacher review</label><input id="result-review" placeholder="Write a short encouraging review" /></div><div class="modal-actions"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveResult()">Post result</button></div>`)}
-function saveResult(){const title=$('#result-title').value.trim(),review=$('#result-review').value.trim();if(!title||!review)return;db.results[communityClass]||=[];db.results[communityClass].unshift({student:$('#result-student').value,score:$('#result-score').value.trim(),title,review});save();closeModal();render()}
+let achievementsList = [];
+async function loadAchievements(){
+  if(!window.classcheckSupabase) return;
+  const {data,error} = await window.classcheckSupabase.from('achievements').select('*').order('created_at',{ascending:false});
+  if(error){console.error(error);return}
+  achievementsList = (data||[]).map(row=>({id:row.id,student:row.student_name,score:row.title||'',rating:row.rating||0,photo:row.certificate_path?publicMediaUrl(row.certificate_path):'',path:row.certificate_path||''}));
+}
+async function openResults(classId,from){communityClass=classId;communityReturn=from;await loadAchievements();screen='results';render()}
+function starRow(n){return Array.from({length:5},(_,i)=>`<span class="star ${i<n?'filled':''}">★</span>`).join('')}
+function results(){
+  const teacher=!!teacherSession;
+  const items=achievementsList;
+  return `<div class="shell"><header class="topbar"><div class="brand"><i class="brand-mark"></i>ClassCheck</div><button class="btn outline" onclick="screen='${communityReturn}';render()">← Back</button></header><main class="results-page"><div class="results-intro"><div><div class="eyebrow">Success stories</div><h1>Results & certificates</h1><p>Real results from students across all groups.</p></div>${teacher?'<button class="btn primary" onclick="openResultModal()">+ Post a result</button>':''}</div><section class="achievement-grid">${items.length?items.map((item,i)=>`<article class="achievement-card accent-${i%6}">${item.photo?`<div class="achievement-photo"><img src="${item.photo}" alt="Certificate"></div>`:''}<div class="achievement-body">${item.score?`<div class="achievement-score">${item.score}</div>`:''}<div class="achievement-name">${item.student}</div>${item.rating?`<div class="star-row">${starRow(item.rating)}</div>`:''}${teacher?`<button class="achievement-delete" title="Remove" onclick="deleteAchievement('${item.id}','${item.path}')">✕</button>`:''}</div></article>`).join(''):'<div class="empty">No results have been posted yet.</div>'}</section></main></div>`;
+}
+function openResultModal(){modal(`<h2>Post a result</h2><div class="field"><label>Student name</label><input id="result-student" placeholder="e.g. Ofiyatullokh" /></div><div class="field"><label>Result / score</label><input id="result-score" placeholder="e.g. IELTS 7.0 or CEFR B2" /></div><div class="field"><label>Certificate photo</label><input id="result-photo" type="file" accept="image/*" /></div><div class="field"><label>Rating (optional)</label><select id="result-rating"><option value="0">No rating</option><option value="5">★★★★★</option><option value="4">★★★★☆</option><option value="3">★★★☆☆</option><option value="2">★★☆☆☆</option><option value="1">★☆☆☆☆</option></select></div><div class="modal-actions"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveResult()">Post result</button></div>`)}
+async function saveResult(){
+  const student=$('#result-student').value.trim();
+  const score=$('#result-score').value.trim();
+  if(!student||!score){alert('Please add the student\'s name and their result.');return}
+  const certFile=$('#result-photo').files?.[0];
+  const rating=parseInt($('#result-rating').value,10)||null;
+  if(certFile && certFile.size>25*1024*1024){alert('Please choose a certificate photo under 25 MB.');return}
+  closeModal();
+  let certificatePath=null;
+  if(certFile){
+    const blob=await compressImage(certFile);
+    certificatePath=`achievements/${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
+    await uploadMedia(blob,certificatePath);
+  }
+  await window.classcheckSupabase.from('achievements').insert({student_name:student,title:score,rating,certificate_path:certificatePath});
+  await loadAchievements();
+  render();
+}
+async function deleteAchievement(id,path){
+  if(!confirm('Remove this result?'))return;
+  await window.classcheckSupabase.from('achievements').delete().eq('id',id);
+  if(path) await window.classcheckSupabase.storage.from('profiles').remove([path]);
+  await loadAchievements();
+  render();
+}
 async function openMembers(classId,from){communityClass=classId;communityReturn=from;await loadProfilesFor(classId);screen='members';render()}
 function openEssential(from){essentialReturn=from;screen='essential-books';render()}
 function essentialBooks(){
