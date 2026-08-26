@@ -161,6 +161,46 @@ async function sendHomeworkMissed(classId,date,studentName){
   const {error}=await window.classcheckSupabase.from('homework_alerts').insert({student_id:student.id,lesson_date:date,note:note||null,marked_by:teacherSession.user.id});
   if(error){alert('Xabar yuborilmadi. Qaytadan urinib ko\'ring.');console.error(error)}
 }
+function openEditStudentModal(name){const phone=db.parentAccess[`${selectedClass}|${name}`]?.phone||'';modal(`<h2>Edit student</h2><div class="field"><label>Student's full name</label><input id="edit-student-name" value="${name}" placeholder="e.g. Farida Kamilova" /></div><div class="field"><label>Parent phone number</label><input id="edit-student-phone" type="tel" value="${phone}" placeholder="+998 90 123 45 67" /></div><div class="modal-actions"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveEditStudent('${name}')">Save changes</button></div>`);setTimeout(()=>$('#edit-student-name').focus(),0)}
+async function saveEditStudent(oldName){
+  const newName=$('#edit-student-name').value.trim();
+  const newPhone=$('#edit-student-phone').value.trim();
+  if(!newName)return;
+  const cls=classById(selectedClass);
+  const student=onlineStudents.find(item=>item.group_id===selectedClass&&item.full_name===oldName);
+  if(teacherSession&&window.classcheckSupabase&&student){
+    const {error}=await window.classcheckSupabase.from('students').update({full_name:newName,parent_phone:newPhone||null}).eq('id',student.id);
+    if(error){alert('Changes could not be saved online. Please try again.');return}
+    student.full_name=newName;
+    student.parent_phone=newPhone;
+  }
+  // carry attendance history and parent access forward under the new name
+  if(newName!==oldName){
+    const idx=cls.students.indexOf(oldName);
+    if(idx!==-1)cls.students[idx]=newName;
+    Object.keys(db.attendance).filter(k=>k.startsWith(selectedClass+'|')).forEach(k=>{
+      const record=db.attendance[k];
+      if(record&&Object.prototype.hasOwnProperty.call(record,oldName)){record[newName]=record[oldName];delete record[oldName]}
+    });
+    const oldKey=`${selectedClass}|${oldName}`,newKey=`${selectedClass}|${newName}`;
+    if(db.parentAccess[oldKey]){db.parentAccess[newKey]=db.parentAccess[oldKey];delete db.parentAccess[oldKey]}
+  }
+  if(newPhone){db.parentAccess[`${selectedClass}|${newName}`]={...(db.parentAccess[`${selectedClass}|${newName}`]||{}),phone:newPhone}}
+  save();closeModal();render();
+}
+function openEditClassModal(){const cls=classById(selectedClass);modal(`<h2>Edit class</h2><div class="field"><label>Class name</label><input id="edit-class-name" value="${cls.name}" placeholder="e.g. Autumn CEFR" /></div><div class="field"><label>Level</label><input id="edit-class-level" value="${cls.level||''}" placeholder="e.g. English" /></div><div class="modal-actions"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveEditClass()">Save changes</button></div>`);setTimeout(()=>$('#edit-class-name').focus(),0)}
+async function saveEditClass(){
+  const newName=$('#edit-class-name').value.trim();
+  const newLevel=$('#edit-class-level').value.trim();
+  if(!newName)return;
+  const cls=classById(selectedClass);
+  if(teacherSession&&window.classcheckSupabase){
+    const {error}=await window.classcheckSupabase.from('groups').update({name:newName,level:newLevel||'English'}).eq('id',selectedClass);
+    if(error){alert('The class could not be renamed online. Please try again.');return}
+  }
+  cls.name=newName;cls.level=newLevel||'English';
+  save();closeModal();render();
+}
 function openStudentModal(){modal(`<h2>Add a student</h2><p>The student will immediately appear on your attendance list.</p><div class="field"><label>Student's full name</label><input id="new-student" placeholder="e.g. Farida Kamilova" onkeydown="if(event.key==='Enter')addStudent()" /></div><div class="modal-actions"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="addStudent()">Add student</button></div>`);setTimeout(()=>$('#new-student').focus(),0)}
 function modal(inner){document.body.insertAdjacentHTML('beforeend',`<div class="modal-backdrop" id="modal"><div class="modal">${inner}</div></div>`)}function closeModal(){$('#modal')?.remove()}
 async function addClass(){let n=$('#new-class').value.trim(),l=$('#new-level').value.trim();if(!n)return;let id='c'+Date.now();if(teacherSession&&window.classcheckSupabase){const {data,error}=await window.classcheckSupabase.from('groups').insert({name:n,level:l||'English',teacher_id:teacherSession.user.id}).select().single();if(error){alert('The class could not be saved online. Please try again.');return}id=data.id}db.classes.push({id,name:n,level:l||'English',students:[]});save();selectedClass=id;closeModal();render()}
@@ -184,7 +224,7 @@ function openParentAccessModal(student){accessStudent=student;const access=db.pa
 async function saveParentAccess(){const phone=$('#parent-phone').value.trim();if(normalizePhone(phone).length<9)return;const key=`${selectedClass}|${accessStudent}`,current=db.parentAccess[key]||{};if(teacherSession){const student=onlineStudents.find(item=>item.group_id===selectedClass&&item.full_name===accessStudent);const {error}=await window.classcheckSupabase.from('students').update({parent_phone:phone}).eq('id',student.id);if(error){alert('Telefon raqami onlayn saqlanmadi.');return}student.parent_phone=phone}db.parentAccess[key]={...current,phone};save();closeModal();render()}
 async function removeStudent(name){if(!confirm(`Remove ${name} from this class? Their attendance record in this class will also be removed.`))return;const student=onlineStudents.find(item=>item.group_id===selectedClass&&item.full_name===name);if(teacherSession&&student){const {error}=await window.classcheckSupabase.from('students').delete().eq('id',student.id);if(error){alert('The student could not be removed online.');return}onlineStudents=onlineStudents.filter(item=>item.id!==student.id)}const cls=classById(selectedClass);cls.students=cls.students.filter(s=>s!==name);Object.keys(db.attendance).filter(k=>k.startsWith(selectedClass+'|')).forEach(k=>delete db.attendance[k][name]);delete db.parentAccess[`${selectedClass}|${name}`];save();render()}
 async function removeClass(){const cls=classById(selectedClass);if(db.classes.length===1){alert('Keep at least one class in ClassCheck. You can rename it or add another class first.');return}if(!confirm(`Delete ${cls.name}? This permanently removes all students and attendance records for this class.`))return;if(teacherSession){const {error}=await window.classcheckSupabase.from('groups').delete().eq('id',selectedClass);if(error){alert('The class could not be removed online.');return}onlineStudents=onlineStudents.filter(item=>item.group_id!==selectedClass)}db.classes=db.classes.filter(c=>c.id!==selectedClass);Object.keys(db.attendance).filter(k=>k.startsWith(selectedClass+'|')).forEach(k=>delete db.attendance[k]);Object.keys(db.parentAccess).filter(k=>k.startsWith(selectedClass+'|')).forEach(k=>delete db.parentAccess[k]);selectedClass=db.classes[0].id;save();render()}
-function addTeacherDeleteControls(){const hero=$('.hero');const deleteClass=document.createElement('button');deleteClass.className='btn danger';deleteClass.textContent='Delete class';deleteClass.onclick=removeClass;hero.querySelector('.btn.primary').before(deleteClass);document.querySelectorAll('.teacher-table tbody tr').forEach((row,index)=>{const student=classById(selectedClass).students[index],accessCell=document.createElement('td'),accessButton=document.createElement('button'),removeCell=document.createElement('td'),removeButton=document.createElement('button');accessButton.className='access-student';accessButton.textContent=db.parentAccess[`${selectedClass}|${student}`]?.phone?'Access set':'Set access';accessButton.onclick=()=>openParentAccessModal(student);removeButton.className='remove-student';removeButton.textContent='Remove';removeButton.onclick=()=>removeStudent(student);accessCell.appendChild(accessButton);removeCell.appendChild(removeButton);row.append(accessCell,removeCell)});const headRow=$('.teacher-table thead tr');headRow.append(document.createElement('th'),document.createElement('th'))}
+function addTeacherDeleteControls(){const hero=$('.hero');const editClass=document.createElement('button');editClass.className='btn soft';editClass.textContent='Edit class';editClass.onclick=openEditClassModal;const deleteClass=document.createElement('button');deleteClass.className='btn danger';deleteClass.textContent='Delete class';deleteClass.onclick=removeClass;hero.querySelector('.btn.primary').before(editClass,deleteClass);document.querySelectorAll('.teacher-table tbody tr').forEach((row,index)=>{const student=classById(selectedClass).students[index],accessCell=document.createElement('td'),accessButton=document.createElement('button'),editCell=document.createElement('td'),editButton=document.createElement('button'),removeCell=document.createElement('td'),removeButton=document.createElement('button');accessButton.className='access-student';const savedPhone=db.parentAccess[`${selectedClass}|${student}`]?.phone;accessButton.textContent=savedPhone?`✓ ${savedPhone}`:'Set access';accessButton.title=savedPhone?`Parent phone: ${savedPhone}`:'';accessButton.onclick=()=>openParentAccessModal(student);editButton.className='edit-student';editButton.textContent='Edit';editButton.onclick=()=>openEditStudentModal(student);removeButton.className='remove-student';removeButton.textContent='Remove';removeButton.onclick=()=>removeStudent(student);accessCell.appendChild(accessButton);editCell.appendChild(editButton);removeCell.appendChild(removeButton);row.append(accessCell,editCell,removeCell)});const headRow=$('.teacher-table thead tr');headRow.append(document.createElement('th'),document.createElement('th'),document.createElement('th'))}
 function render(){if(screen==='login'){language='UZB';localStorage.setItem('classcheck-language',language)}$('#app').innerHTML=screen==='teacher-login'?teacherLoginPage():screen==='teacher'?teacher():screen==='login'?parentLogin():screen==='parent'?parent():screen==='community'?community():screen==='teacher-profile'?teacherProfile():screen==='student-profile'?studentProfile():screen==='members'?members():screen==='essential-books'?essentialBooks():screen==='essential-units'?essentialUnitsScreen():screen==='essential-words'?essentialWordsScreen():results();if(screen==='teacher')addTeacherDeleteControls();if(screen==='teacher'||screen==='parent'||screen==='community')addCommunityLinks();if(screen==='parent')$('.topbar .btn.outline').onclick=logoutParent;addTeacherBranding();addLanguageSwitch();applyLanguage()}
 render();
 
