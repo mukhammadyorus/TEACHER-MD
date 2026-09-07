@@ -161,18 +161,20 @@ async function sendHomeworkMissed(classId,date,studentName){
   const {error}=await window.classcheckSupabase.from('homework_alerts').insert({student_id:student.id,lesson_date:date,note:note||null,marked_by:teacherSession.user.id});
   if(error){alert('Xabar yuborilmadi. Qaytadan urinib ko\'ring.');console.error(error)}
 }
-function openEditStudentModal(name){const phone=db.parentAccess[`${selectedClass}|${name}`]?.phone||'';modal(`<h2>Edit student</h2><div class="field"><label>Student's full name</label><input id="edit-student-name" value="${name}" placeholder="e.g. Farida Kamilova" /></div><div class="field"><label>Parent phone number</label><input id="edit-student-phone" type="tel" value="${phone}" placeholder="+998 90 123 45 67" /></div><div class="modal-actions"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveEditStudent('${name}')">Save changes</button></div>`);setTimeout(()=>$('#edit-student-name').focus(),0)}
+function openEditStudentModal(name){const phone=db.parentAccess[`${selectedClass}|${name}`]?.phone||'';const student=onlineStudents.find(item=>item.group_id===selectedClass&&item.full_name===name);const passkey=student?.telegram_passkey||'';modal(`<h2>Edit student</h2><div class="field"><label>Student's full name</label><input id="edit-student-name" value="${name}" placeholder="e.g. Farida Kamilova" /></div><div class="field"><label>Parent phone number</label><input id="edit-student-phone" type="tel" value="${phone}" placeholder="+998 90 123 45 67" /></div><div class="field"><label>Telegram passkey</label><input id="edit-student-passkey" value="${passkey}" placeholder="e.g. AKMAL2026" /><p class="field-hint">Give this code to the parent. They send it to the Telegram bot to connect \u2014 no login needed.</p></div><div class="modal-actions"><button class="btn soft" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="saveEditStudent('${name}')">Save changes</button></div>`);setTimeout(()=>$('#edit-student-name').focus(),0)}
 async function saveEditStudent(oldName){
   const newName=$('#edit-student-name').value.trim();
   const newPhone=$('#edit-student-phone').value.trim();
+  const newPasskey=$('#edit-student-passkey').value.trim();
   if(!newName)return;
   const cls=classById(selectedClass);
   const student=onlineStudents.find(item=>item.group_id===selectedClass&&item.full_name===oldName);
   if(teacherSession&&window.classcheckSupabase&&student){
-    const {error}=await window.classcheckSupabase.from('students').update({full_name:newName,parent_phone:newPhone||null}).eq('id',student.id);
-    if(error){alert('Changes could not be saved online. Please try again.');return}
+    const {error}=await window.classcheckSupabase.from('students').update({full_name:newName,parent_phone:newPhone||null,telegram_passkey:newPasskey||null}).eq('id',student.id);
+    if(error){alert(error.code==='23505'?'That passkey is already used by another student. Please choose a different one.':'Changes could not be saved online. Please try again.');return}
     student.full_name=newName;
     student.parent_phone=newPhone;
+    student.telegram_passkey=newPasskey;
   }
   // carry attendance history and parent access forward under the new name
   if(newName!==oldName){
