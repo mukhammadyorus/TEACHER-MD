@@ -15,7 +15,7 @@ const TELEGRAM_ICON_SVG = '<svg style="transform:translate(9px,9px)" viewBox="72
 let parentSession = null, parentStudentId = null;
 const TELEGRAM_BOT_USERNAME = 'teacher_md_bot';
 let telegramLinked = false;
-async function checkTelegramLink(){if(!window.classcheckSupabase||!parentStudentId)return;const {data} = await window.classcheckSupabase.from('telegram_links').select('student_id').eq('student_id',parentStudentId).maybeSingle();telegramLinked=!!data}
+async function checkTelegramLink(){if(!window.classcheckSupabase||!parentStudentId)return;const {data} = await window.classcheckSupabase.from('telegram_links').select('student_id').eq('student_id',parentStudentId).limit(1);telegramLinked=!!(data&&data.length)}
 let profileStudent = '', profileClass = '', profileReturn = 'parent', profileEditable = false, teacherProfileReturn = 'parent';
 let teacherSession = null, onlineStudents = [];
 let essentialReturn = 'teacher', essentialBook = null, essentialUnit = null;
